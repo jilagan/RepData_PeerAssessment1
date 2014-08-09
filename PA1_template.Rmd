@@ -3,11 +3,20 @@
 
 ## Loading and preprocessing the data
 
-
+```{r echo=TRUE}
+library(plyr)
+activity <- read.csv('activity.csv')
+stepsbydate <- ddply(activity, .(date), summarize, total=sum(steps,na.rm=TRUE))
+```
 
 ## What is mean total number of steps taken per day?
-
-
+```{r echo=TRUE}
+plot(stepsbydate$date, stepsbydate$total)
+meansteps <- mean(stepsbydate$total,na.rm=TRUE)
+mediansteps <- median(stepsbydate$total, na.rm=TRUE)
+```
+Mean steps per day is `r meansteps`.  
+Median steps per day is `r mediansteps`.
 
 ## What is the average daily activity pattern?
 
