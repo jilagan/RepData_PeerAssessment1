@@ -7,11 +7,13 @@
 library(plyr)
 activity <- read.csv('activity.csv')
 stepsbydate <- ddply(activity, .(date), summarize, total=sum(steps,na.rm=TRUE))
+stepsbyinterval <- ddply(activity, .(interval), summarize, total=sum(steps,na.rm=TRUE), mean=mean(steps,na.rm=TRUE))
+stepsbyinterval$interval <- sprintf("%04d",stepsbyinterval$interval)
 ```
 
 ## What is mean total number of steps taken per day?
 ```{r echo=TRUE}
-plot(stepsbydate$date, stepsbydate$total)
+hist(stepsbydate$total, main="Total Steps Taken Each Day", xlab="Total Steps Taken Each Day",col="green")
 meansteps <- mean(stepsbydate$total,na.rm=TRUE)
 mediansteps <- median(stepsbydate$total, na.rm=TRUE)
 ```
@@ -20,7 +22,15 @@ Median steps per day is `r mediansteps`.
 
 ## What is the average daily activity pattern?
 
-
+```{r echo=TRUE}
+# Customize x-axis; suppress plot x axis and replace with own values
+plot(stepsbyinterval$interval, stepsbyinterval$mean, type="l", color="blue", xlab="5-Minute Time Intervals",xaxt="n", ylab="Average Steps per Time Interval")
+# axis(1,at=x<-stepsbyinterval$interval,labels=sprintf("%04d",x))
+axis(1,at=x<-stepsbyinterval$interval,labels=as.character(x), cex.axis=0.7)
+intervalwithmaxsteps <- stepsbyinterval[which(stepsbyinterval$mean==max(stepsbyinterval$mean)),]$interval
+maximumsteps <- max(stepsbyinterval$mean)
+```
+The 5-minute interval that contains the maximum number of average steps is `r intervalwithmaxsteps` with `r maximumsteps` steps.
 
 ## Imputing missing values
 
