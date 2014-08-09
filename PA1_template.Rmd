@@ -7,8 +7,8 @@
 library(plyr)
 activity <- read.csv('activity.csv')
 stepsbydate <- ddply(activity, .(date), summarize, total=sum(steps,na.rm=TRUE))
-stepsbyinterval <- ddply(activity, .(interval), summarize, total=sum(steps,na.rm=TRUE), mean=mean(steps,na.rm=TRUE))
-stepsbyinterval$interval <- sprintf("%04d",stepsbyinterval$interval)
+stepsbyinterval <- ddply(activity, .(interval), summarize, total=sum(steps,na.rm=TRUE), mean=mean(steps,na.rm=TRUE), median=median(steps,na.rm=TRUE))
+# stepsbyinterval$interval <- sprintf("%04d",stepsbyinterval$interval)
 ```
 
 ## What is mean total number of steps taken per day?
@@ -17,23 +17,51 @@ hist(stepsbydate$total, main="Total Steps Taken Each Day", xlab="Total Steps Tak
 meansteps <- mean(stepsbydate$total,na.rm=TRUE)
 mediansteps <- median(stepsbydate$total, na.rm=TRUE)
 ```
-Mean steps per day is `r meansteps`.  
-Median steps per day is `r mediansteps`.
+Mean steps per day is `r formatC(meansteps,format="d")`.  
+Median steps per day is `r formatC(mediansteps,format="d")`.
 
 ## What is the average daily activity pattern?
 
 ```{r echo=TRUE}
 # Customize x-axis; suppress plot x axis and replace with own values
 plot(stepsbyinterval$interval, stepsbyinterval$mean, type="l", color="blue", xlab="5-Minute Time Intervals",xaxt="n", ylab="Average Steps per Time Interval")
-# axis(1,at=x<-stepsbyinterval$interval,labels=sprintf("%04d",x))
-axis(1,at=x<-stepsbyinterval$interval,labels=as.character(x), cex.axis=0.7)
+axis(1,at=x<-stepsbyinterval$interval,labels=sprintf("%04d",x), cex.axis=0.7)
+# axis(1,at=x<-stepsbyinterval$interval,labels=as.character(x), cex.axis=0.7)
 intervalwithmaxsteps <- stepsbyinterval[which(stepsbyinterval$mean==max(stepsbyinterval$mean)),]$interval
 maximumsteps <- max(stepsbyinterval$mean)
 ```
 The 5-minute interval that contains the maximum number of average steps is `r intervalwithmaxsteps` with `r maximumsteps` steps.
 
 ## Imputing missing values
+```{r echo=TRUE}
 
+rowswithna <- activity[!complete.cases(activity),]
+```
+The total number of rows with NAs in the data set is `r nrow(rowswithna)`.
 
+I shall use the mean for the 5 minute interval to replace the NA values.
+```{r echo=TRUE}
+# create another dataset activity2 from activity. merge with dataset containing average (mean) steps per interval, then replace NA step values with the mean.
+activity2 <- activity
+activity2 <- merge(activity2,stepsbyinterval,by.x="interval",sort=FALSE)
+# Sort by date and interval
+activity2<-activity2[with(activity2, order(date,interval)),]
+activity2[!complete.cases(activity2),]$steps <- activity2[!complete.cases(activity2),]$mean
+# Remove mean and median columns as they are no longer needed
+activity2<-activity2[,c("steps","date","interval","total")]
+
+```
+Calculating total number of steps taken each day and calculating mean and median steps per day based on the new data set.
+```{r echo=TRUE}
+stepsbydate2 <- ddply(activity2, .(date), summarize, total=sum(steps,na.rm=TRUE))
+stepsbyinterval2 <- ddply(activity2, .(interval), summarize, total=sum(steps,na.rm=TRUE), mean=mean(steps,na.rm=TRUE), median=median(steps,na.rm=TRUE))
+hist(stepsbydate2$total, main="Total Steps Taken Each Day", xlab="Total Steps Taken Each Day",col="green")
+#meansteps2 <- mean(stepsbydate2$total,na.rm=TRUE)
+#mediansteps2 <- median(stepsbydate2$total, na.rm=TRUE)
+meansteps2 <- mean(stepsbydate2$total)
+mediansteps2 <- median(stepsbydate2$total)
+```
+New mean steps per day is `r formatC(meansteps2,format="d")`. Value in first step was `r meansteps` (difference is `r meansteps2-meansteps`.    
+New median steps per day is `r formatC(mediansteps2,format="d")`. Value in first step was `r mediansteps` (difference is `r formatC(mediansteps2-mediansteps,format="d")`).
 
 ## Are there differences in activity patterns between weekdays and weekends?
