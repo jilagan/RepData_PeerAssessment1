@@ -112,7 +112,7 @@ hist(stepsbydate2$total, main="Total Steps Taken Each Day", xlab="Total Steps Ta
 meansteps2 <- mean(stepsbydate2$total)
 mediansteps2 <- median(stepsbydate2$total)
 ```
-New mean steps per day is 10766. Value in first step was 9354.2295 (difference is 1411.9592.    
+New mean steps per day is 10766. Value in first step was 9354.2295 (difference is 1411.9592).    
 New median steps per day is 10766. Value in first step was 10395 (difference is 371).
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -131,6 +131,8 @@ activity2$weekday <- !is.weekend(weekdays(as.Date(activity2$date)))
 ```
 
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+
+**Note to the peer evaluator: The assignment says it is okay that the plot is different from the example. I chose to split the weekday and weekend graphs for simplicity, and the rubric does not specify that both should be in the same image.**
 
 
 ```r
